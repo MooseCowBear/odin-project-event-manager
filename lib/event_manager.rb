@@ -44,6 +44,12 @@ def clean_phone_number(number)
   end
 end
 
+def most_popular_hours(dates, num)
+  #return the num most popular hours of registration in an array
+  dates.map { |elem| elem.hour }.tally.sort_by { |k, v| v }.reverse
+  .map { |k, v| k }[0...num]
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -55,15 +61,20 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
+registration_datetimes = Array.new
+
 contents.each do |row|
   id = row[0] #bc col had no name
   name = row[:first_name]
-
   phone_number = row[:homephone]
 
   phone_number = clean_phone_number(phone_number)
 
-  puts "#{name}'s phone number is #{phone_number}"
+  registration_datetimes.push(DateTime.strptime(row[:regdate], '%m/%d/%y %k:%M'))
+
+  #registration_datetimes.push(registration)
+
+  #puts "#{name}'s phone number is #{phone_number}"
 
   #zipcode = clean_zipcode(row[:zipcode])
 
@@ -75,3 +86,5 @@ contents.each do |row|
 
 end
 
+top_two = most_popular_hours(registration_datetimes, 4)
+puts top_two
