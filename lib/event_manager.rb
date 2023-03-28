@@ -40,7 +40,7 @@ def clean_phone_number(number)
   if number.length == 10 || (number.length == 11 && number.start_with?("1"))
     number.to_s[-10..-1]
   else
-    ''.rjust(10, '0')
+    ''.rjust(10, '0') #returns string of 10 zeros if invalid, mirroring zipcode
   end
 end
 
@@ -65,6 +65,7 @@ def convert_weekday(num)
 end
 
 def most_popular(dates, num, type)
+  #return num most popular (in case we want top 2 or more)
   dates.map { |elem| type.call(elem) }.tally.sort_by { |k, v| v }.reverse
   .map { |k, v| k }[0...num]
 end
@@ -95,24 +96,23 @@ contents.each do |row|
   name = row[:first_name]
   phone_number = row[:homephone]
 
+  zipcode = clean_zipcode(row[:zipcode])
+
+  legislators = legislators_by_zipcode(zipcode)
+
+  form_letter = erb_template.result(binding)
+  
+  save_thank_you_letter(id, form_letter)
+
   phone_number = clean_phone_number(phone_number)
 
   registration_datetimes.push(DateTime.strptime(row[:regdate], '%m/%d/%y %k:%M'))
 
-  puts "#{name}'s phone number is #{phone_number}"
-
-  #zipcode = clean_zipcode(row[:zipcode])
-
-  #legislators = legislators_by_zipcode(zipcode)
-
-  #form_letter = erb_template.result(binding)
-  
-  #save_thank_you_letter(id, form_letter)
-
+  #puts "#{name}'s phone number is #{phone_number}"
 end
 
-top_hours = most_popular_hours(registration_datetimes, 2)
-puts top_hours
+top_hours = most_popular_hours(registration_datetimes, 1)
+puts "The most popular hour is: #{top_hours[0]}"
 
-top_days = most_popular_days(registration_datetimes, 2)
-puts top_days
+top_days = most_popular_days(registration_datetimes, 1)
+puts "The most popular day is: #{top_days[0]}"
