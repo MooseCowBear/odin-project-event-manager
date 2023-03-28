@@ -44,10 +44,37 @@ def clean_phone_number(number)
   end
 end
 
-def most_popular_hours(dates, num)
-  #return the num most popular hours of registration in an array
-  dates.map { |elem| elem.hour }.tally.sort_by { |k, v| v }.reverse
+def get_hour(date) #helper methods
+  date.hour
+end
+
+def get_weekday(date)
+  date.wday
+end
+
+def convert_weekday(num)
+  day = case num
+        when 0 then "Sunday"
+        when 1 then "Monday"
+        when 2 then "Tuesday"
+        when 3 then "Wednesday"
+        when 4 then "Thursday"
+        when 5 then "Friday"
+        else "Saturday"
+        end
+end
+
+def most_popular(dates, num, type)
+  dates.map { |elem| type.call(elem) }.tally.sort_by { |k, v| v }.reverse
   .map { |k, v| k }[0...num]
+end
+
+def most_popular_hours(dates, num)
+  most_popular(dates, num, method(:get_hour))
+end
+
+def most_popular_days(dates, num)
+  most_popular(dates, num, method(:get_weekday)).map { |elem| convert_weekday(elem) }
 end
 
 puts 'EventManager initialized.'
@@ -72,9 +99,7 @@ contents.each do |row|
 
   registration_datetimes.push(DateTime.strptime(row[:regdate], '%m/%d/%y %k:%M'))
 
-  #registration_datetimes.push(registration)
-
-  #puts "#{name}'s phone number is #{phone_number}"
+  puts "#{name}'s phone number is #{phone_number}"
 
   #zipcode = clean_zipcode(row[:zipcode])
 
@@ -86,5 +111,8 @@ contents.each do |row|
 
 end
 
-top_two = most_popular_hours(registration_datetimes, 4)
-puts top_two
+top_hours = most_popular_hours(registration_datetimes, 2)
+puts top_hours
+
+top_days = most_popular_days(registration_datetimes, 2)
+puts top_days
